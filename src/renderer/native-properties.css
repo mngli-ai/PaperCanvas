@@ -1,0 +1,65 @@
+/* The source Section stays React-owned; only its Island moves. No empty
+   floating card remains, and its visually-hidden heading still labels the dock. */
+.excalidraw .selected-shape-actions[data-native-properties-source] {
+  display: contents !important;
+}
+
+.native-properties-host {
+  min-width: 0;
+  min-height: 0;
+  overflow: visible;
+}
+
+/* Stock Excalidraw controls require both the class scope and theme variables.
+   Do not copy the editor's absolute canvas sizing or its touch-action:none. */
+.native-properties-host > .excalidraw.native-properties-context {
+  position: relative;
+  inset: auto;
+  width: 100%;
+  height: auto;
+  min-width: 0;
+  min-height: 0;
+  overflow: visible;
+  background: transparent;
+  color: var(--text-primary-color);
+  font-family: var(--ui-font);
+  touch-action: auto;
+  pointer-events: auto;
+}
+
+.native-properties-context > .native-properties-slot {
+  display: block;
+  position: static;
+  width: 100%;
+  max-width: none;
+  margin: 0;
+  padding: 0;
+  transform: none;
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.native-properties-context .native-properties-slot > .Island.App-menu__left {
+  position: relative;
+  inset: auto;
+  width: 100%;
+  max-width: none;
+  /* LayerUI's inline maxHeight is based on canvas height, not sidebar height. */
+  max-height: none !important;
+  overflow: visible;
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0.75rem;
+  border: 0;
+  border-radius: 0;
+  box-shadow: none;
+  background: transparent;
+}
+
+.native-properties-context .native-properties-slot fieldset {
+  min-width: 0;
+}
+
+.native-properties-context .native-properties-slot input[type='range'] {
+  max-width: 100%;
+}
