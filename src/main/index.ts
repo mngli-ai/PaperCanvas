@@ -9,6 +9,12 @@ import { createCommandBroker, startBridge } from './bridge.ts'
 import {FORMULA_RASTER_CHANNEL,rasterizeFormula} from './formulaRaster';
 import { documentTargetFor } from './document-target.ts'
 import type { DocumentTarget } from './document-target.ts'
+import { WorkspaceStore } from './workspace.ts'
+
+let workspaceStore: WorkspaceStore | null = null
+function workspace() {
+  return workspaceStore ??= new WorkspaceStore(join(app.getPath('userData'), 'workspace.json'))
+}
 
 if(process.env.PAPER_CANVAS_TEST_PROFILE) app.setPath('userData',process.env.PAPER_CANVAS_TEST_PROFILE)
 let window: BrowserWindow | null = null
@@ -48,6 +54,22 @@ async function createWindow() {
   if (devUrl) await win.loadURL(devUrl)
   else await win.loadFile(rendererFile)
 }
+
+let choosingWorkspace = false
+ipcMain.handle('paper:workspace:get', async (event) => { trusted(event); return workspace().get() })
+ipcMain.handle('paper:workspace:choose', async (event) => {
+  trusted(event)
+  if (choosingWorkspace) throw new Error('工作区选择器已打开')
+  choosingWorkspace = true
+  try {
+    const result = await dialog.showOpenDialog(window!, { title: '选择 PaperCanvas 工作区', properties: ['openDirectory'] })
+    if (result.canceled || !result.filePaths[0]) return null
+    return await workspace().choose(result.filePaths[0])
+  } finally { choosingWorkspace = false }
+})
+ipcMain.handle('paper:workspace:list', async (event, path: unknown = '') => { trusted(event); return workspace().list(path) })
+ipcMain.handle('paper:workspace:read', async (event, path: unknown) => { trusted(event); return workspace().read(path) })
+ipcMain.handle('paper:workspace:read-dropped', async (event, path: unknown) => { trusted(event); return workspace().readDroppedPath(path) })
 
 let renderingFormula=false;
 ipcMain.handle(FORMULA_RASTER_CHANNEL,async(event,source:unknown)=>{trusted(event);if(renderingFormula)throw Error('公式正在渲染，请稍后');renderingFormula=true;try{return await rasterizeFormula(source)}finally{renderingFormula=false}});

@@ -30,6 +30,10 @@ npm run build
 
 支持 inspect / read_canvas / apply_canvas / validate / runner_state。apply_canvas 为带 expectedRevision 的整画布替换，需先读取并保留用户布局；不是最终的语义 patch API。当前未自动配置 Hermes MCP，不修改现有 Hermes 配置。
 
+## 文件、素材与侧栏
+
+右侧“文件与素材”统一浏览工作区目录和素材；打开文件夹后可逐级展开，双击项目文件打开，拖到画布则导入为可展开模块。支持 PaperCanvas JSON、.excalidraw；.excalidrawlib 载入素材列表。导入为独立副本，包含源工程层级与演示路线，不实时链接源文件。左右侧栏可各自收起，边缘按钮重新展开，状态本地保存。模块与公式入口已合入 Excalidraw 原生顶部工具条。运行路线位于右侧“运行演示”页签。
+
 ## 验收
 
 - npm run typecheck
