@@ -1,0 +1,3 @@
+import test from 'node:test';import assert from 'node:assert/strict';
+import {unboundArrowIds} from '../src/renderer/arrow-policy.ts';
+test('reports arrows missing either live endpoint, not lines or deleted arrows',()=>{const elements=[{id:'a',type:'rectangle'},{id:'b',type:'rectangle'},{id:'ok',type:'arrow',startBinding:{elementId:'a'},endBinding:{elementId:'b'}},{id:'loose',type:'arrow',startBinding:{elementId:'a'}},{id:'missing',type:'arrow',startBinding:{elementId:'a'},endBinding:{elementId:'no'}},{id:'dead',type:'arrow',isDeleted:true},{id:'line',type:'line'}];assert.deepEqual(unboundArrowIds(elements),['loose','missing']);});

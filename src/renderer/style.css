@@ -1,0 +1,188 @@
+:root {
+  font-family: 'Segoe UI', 'Microsoft YaHei UI', 'Microsoft YaHei', sans-serif;
+  color: #293548;
+  background: #f5f6f8;
+  font-synthesis: none;
+  --pc-border: #e1e5eb;
+  --pc-muted: #697587;
+  --pc-accent: #365fb2;
+  --pc-accent-soft: #edf2fc;
+  --pc-focus: #5278c1;
+}
+
+* { box-sizing: border-box; }
+body { margin: 0; font-size: 13px; line-height: 1.5; }
+.app { height: 100vh; height: 100dvh; display: flex; flex-direction: column; overflow: hidden; }
+
+/* Shell controls only: the embedded editor owns its typography and controls. */
+.app > header button,
+.app > .workspace > aside button,
+.breadcrumbs button,
+.modal button {
+  font: inherit;
+  font-weight: 500;
+  line-height: 1.4;
+  min-height: 34px;
+  padding: 7px 11px;
+  color: #39475b;
+  background: #fff;
+  border: 1px solid #d8dee7;
+  border-radius: 6px;
+  cursor: pointer;
+  white-space: nowrap;
+  word-break: keep-all;
+  writing-mode: horizontal-tb;
+  flex-shrink: 0;
+  transition: background-color 120ms ease, border-color 120ms ease, box-shadow 120ms ease;
+}
+.app > header button:hover:not(:disabled),
+.app > .workspace > aside button:hover:not(:disabled),
+.breadcrumbs button:hover:not(:disabled),
+.modal button:hover:not(:disabled) {
+  background: #f2f5fa;
+  border-color: #afbdd2;
+}
+.app > header button:active:not(:disabled),
+.app > .workspace > aside button:active:not(:disabled),
+.breadcrumbs button:active:not(:disabled),
+.modal button:active:not(:disabled) { background: #e8eef7; }
+.app > header button:focus-visible,
+.app > .workspace > aside button:focus-visible,
+.breadcrumbs button:focus-visible,
+.modal button:focus-visible {
+  outline: 2px solid var(--pc-focus);
+  outline-offset: 2px;
+}
+.app > header button:disabled,
+.app > .workspace > aside button:disabled,
+.modal button:disabled { opacity: .45; cursor: not-allowed; box-shadow: none; }
+.app > header button.primary,
+.app > .workspace > aside button.primary,
+.modal button.primary { color: #fff; background: var(--pc-accent); border-color: var(--pc-accent); }
+.app > header button.primary:hover:not(:disabled),
+.app > .workspace > aside button.primary:hover:not(:disabled),
+.modal button.primary:hover:not(:disabled) { background: #2c519b; border-color: #2c519b; }
+
+.app > header {
+  min-height: 68px;
+  flex: none;
+  padding: 12px 22px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  background: #fff;
+  border-bottom: 1px solid var(--pc-border);
+}
+.brand { display: flex; gap: 15px; align-items: baseline; min-width: 0; }
+.brand b { font-size: 22px; font-weight: 650; letter-spacing: -.7px; color: #273c5e; white-space: nowrap; }
+.brand span { font-size: 12px; color: var(--pc-muted); white-space: nowrap; }
+.app > header nav { display: flex; align-items: center; gap: 8px; flex: none; }
+.app > header nav button { min-width: 56px; }
+.app > header nav .primary { margin-left: 4px; padding-inline: 16px; }
+.workspace { flex: 1; min-height: 0; display: flex; }
+.workspace > aside { background: #f8f9fb; padding: 18px 14px; overflow-y: auto; overscroll-behavior: contain; flex: none; scrollbar-width: thin; scrollbar-color: #cbd2dd transparent; }
+.workspace > aside.left { width: 220px; border-right: 1px solid var(--pc-border); }
+.workspace > aside.right { width: 276px; border-left: 1px solid var(--pc-border); }
+.workspace > aside h3 { font-size: 11px; font-weight: 650; letter-spacing: .6px; color: #667286; margin: 24px 2px 10px; line-height: 20px; }
+.workspace > aside > h3:first-child { margin-top: 0; }
+.app > .workspace > aside button { display: block; width: 100%; text-align: left; margin: 8px 0; font-size: 12px; }
+.app > .workspace > aside .canvas-item { border-color: transparent; background: transparent; margin: 3px 0; overflow: hidden; text-overflow: ellipsis; padding-inline: 10px; }
+.app > .workspace > aside .canvas-item.active { background: var(--pc-accent-soft); color: #2f559d; border-color: #dae4f6; font-weight: 600; box-shadow: inset 3px 0 0 #5278bd; }
+.aside-note { font-size: 11px; line-height: 1.85; color: var(--pc-muted); padding: 12px 3px 16px; margin-top: 8px; border-bottom: 1px solid var(--pc-border); overflow-wrap: anywhere; }
+.workspace > aside .muted { font-size: 11px; line-height: 1.85; color: var(--pc-muted); margin: 18px 2px 0; overflow-wrap: anywhere; }
+.workspace > main { display: flex; flex-direction: column; flex: 1; min-width: 0; background: #fff; }
+.breadcrumbs { min-height: 44px; flex: none; display: flex; align-items: center; gap: 5px; padding: 5px 14px; background: #fff; border-bottom: 1px solid var(--pc-border); overflow-x: auto; scrollbar-width: thin; }
+.breadcrumbs button { min-height: 28px; border-color: transparent; font-size: 12px; background: transparent; padding: 4px 7px; max-width: 240px; overflow: hidden; text-overflow: ellipsis; }
+.breadcrumbs button:last-of-type { color: #2e466c; font-weight: 600; }
+.breadcrumbs > span { color: #8b96a7; }
+.breadcrumbs .revision { margin-left: auto; padding-left: 12px; font-size: 10px; font-family: Consolas, monospace; white-space: nowrap; font-variant-numeric: tabular-nums; }
+.drawing { position: relative; flex: 1; min-height: 0; isolation: isolate; }
+.drawing .excalidraw { --default-bg-color: #fff; }
+.execution-highlight { position: absolute; pointer-events: none; border: 2px solid; border-radius: 10px; box-shadow: 0 0 0 4px #5278bd1a; z-index: 5; transition: left 160ms ease, top 160ms ease, width 160ms ease, height 160ms ease; }
+.status { min-height: 31px; flex: none; border-top: 1px solid var(--pc-border); color: #647287; font-size: 11px; line-height: 18px; padding: 6px 16px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; background: #fafbfd; }
+.badge { font-size: 10px; font-weight: 500; letter-spacing: 0; background: #eef1f6; color: #65758b; border: 1px solid #dfe5ee; padding: 0 6px; border-radius: 4px; float: right; }
+.workspace > aside select,
+.workspace > aside input,
+.modal input,
+.modal textarea { font: inherit; color: #334158; background: #fff; border: 1px solid #cfd7e3; border-radius: 6px; transition: border-color 120ms ease, box-shadow 120ms ease; }
+.workspace > aside select { width: 100%; min-height: 36px; padding: 7px 30px 7px 10px; text-overflow: ellipsis; }
+.workspace > aside select:focus-visible,
+.workspace > aside input:focus-visible,
+.modal input:focus,
+.modal textarea:focus { outline: 2px solid var(--pc-focus); outline-offset: 2px; border-color: var(--pc-focus); }
+.row { display: flex; gap: 8px; align-items: center; min-width: 0; }
+.app > .workspace > aside .row button { width: auto; flex: 1; text-align: center; }
+.row input[type=color] { width: 32px; height: 32px; flex: 0 0 32px; padding: 3px; border: 1px solid #d8dee7; border-radius: 6px; background: white; cursor: pointer; }
+.row input[type=color]::-webkit-color-swatch-wrapper { padding: 2px; }
+.row input[type=color]::-webkit-color-swatch { border: 0; border-radius: 3px; }
+.steps { padding: 0; list-style: none; min-height: 128px; max-height: 32vh; overflow-y: auto; scrollbar-width: thin; margin: 14px 0 16px; }
+.steps:empty { border: 1px dashed #d7dee8; border-radius: 7px; display: flex; align-items: center; justify-content: center; }
+.steps:empty::before { content: '路线步骤将在这里显示'; color: #7c8798; font-size: 11px; padding: 16px; text-align: center; }
+.steps li { border: 1px solid var(--pc-border); border-radius: 6px; margin: 7px 0; background: white; padding: 9px 8px; }
+.steps li:first-child { margin-top: 0; }
+.steps li > div { display: flex; gap: 9px; align-items: center; min-width: 0; }
+.steps b { display: grid; place-items: center; min-width: 24px; height: 24px; font-size: 11px; font-weight: 600; background: #f0f3f7; border-radius: 5px; color: #687990; font-variant-numeric: tabular-nums; }
+.steps span { flex: 1; min-width: 0; font-size: 12px; line-height: 1.6; overflow-wrap: anywhere; }
+.steps small { display: block; color: #748298; font-size: 10px; margin-top: 2px; }
+.app > .workspace > aside .steps button { width: 26px; min-height: 26px; margin: 0; padding: 2px; border-color: transparent; color: #7a879a; text-align: center; font-size: 17px; background: transparent; }
+.app > .workspace > aside .steps button:hover { color: #ac3d46; background: #fff0f1; border-color: #f1d3d6; }
+.steps .current { border-color: #8ea9dc; background: #f0f5ff; box-shadow: inset 3px 0 0 #5278bd; }
+.steps .current b { background: #dfe9fb; color: #365fa6; }
+.run-controls { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 7px; }
+.app > .workspace > aside .run-controls button { text-align: center; margin: 0; padding-inline: 7px; }
+.app > .workspace > aside .run-controls button:first-child { grid-column: 1 / -1; background: #edf2fc; border-color: #d3dff3; color: #355a9d; }
+.callstack { border-top: 1px solid var(--pc-border); margin-top: 20px; padding-top: 2px; font-size: 11px; line-height: 1.85; color: #64748b; overflow-wrap: anywhere; }
+.callstack h3 { margin-top: 14px !important; }
+.callstack > div { border-left: 2px solid #d5deed; padding: 4px 10px; margin: 4px 0; background: #f0f3f8; border-radius: 0 4px 4px 0; }
+.callstack p { margin: 10px 0 0; }
+.modal-backdrop { position: fixed; inset: 0; background: #1c293e59; display: flex; align-items: center; justify-content: center; padding: 24px; z-index: 1000; }
+.modal { width: min(680px, 100%); max-height: min(85vh, 780px); overflow-y: auto; overscroll-behavior: contain; background: #fff; border: 1px solid #dce2ec; padding: 28px; border-radius: 12px; box-shadow: 0 18px 64px #172b4b2e, 0 2px 8px #172b4b14; scrollbar-width: thin; }
+.modal h2 { margin: 0 0 12px; font-size: 19px; font-weight: 600; letter-spacing: -.3px; color: #283a55; }
+.modal p { color: var(--pc-muted); font-size: 12px; line-height: 1.8; margin: 0 0 18px; }
+.modal > input { display: block; width: 100%; min-height: 40px; padding: 9px 12px; margin: 20px 0 24px; }
+.modal textarea { display: block; width: 100%; min-height: 140px; max-height: 35vh; padding: 14px; font: 13px/1.8 Consolas, 'Cascadia Code', monospace; resize: vertical; tab-size: 2; }
+.formula-preview { display: flex; align-items: center; justify-content: center; padding: 24px; background: #f8f9fc; border: 1px solid #e3e8f0; border-radius: 7px; min-height: 116px; margin: 18px 0 24px; overflow: auto; }
+.formula-preview > div { max-width: 100%; }
+.formula-preview pre { width: 100%; margin: 0; white-space: pre-wrap; overflow-wrap: anywhere; color: #b14149; font: 12px/1.7 Consolas, monospace; }
+.modal > .row { justify-content: flex-end; padding-top: 16px; border-top: 1px solid #e9edf3; }
+.modal > .row button { flex: none; min-width: 76px; }
+
+@media (max-width: 1200px) {
+  .workspace > aside.left { width: 196px; }
+  .workspace > aside.right { width: 248px; }
+  .workspace > aside { padding: 16px 12px; }
+  .brand span { display: none; }
+}
+@media (max-width: 960px) {
+  .app > header { min-height: 60px; padding: 10px 16px; }
+  .brand b { font-size: 20px; }
+  .workspace > aside.left { width: 180px; }
+  .workspace > aside.right { width: 222px; }
+  .workspace > aside { padding: 14px 10px; }
+  .breadcrumbs { padding-inline: 8px; }
+}
+@media (max-width: 740px) {
+  .app > header { flex-wrap: wrap; gap: 8px 16px; }
+  .app > header nav { max-width: 100%; overflow-x: auto; padding: 2px; }
+  .workspace { overflow: auto; }
+  .workspace > aside.left { width: 174px; }
+  .workspace > aside.right { width: 216px; }
+  .workspace > main { min-width: 340px; }
+  .modal-backdrop { padding: 16px; }
+  .modal { padding: 20px; max-height: 90vh; }
+}
+@media (max-height: 700px) {
+  .workspace > aside h3 { margin-top: 18px; }
+  .steps { min-height: 80px; max-height: 24vh; }
+  .aside-note { padding-block: 8px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .app > header button,
+  .app > .workspace > aside button,
+  .breadcrumbs button,
+  .modal button,
+  .modal input,
+  .modal textarea,
+  .execution-highlight { transition: none; }
+}

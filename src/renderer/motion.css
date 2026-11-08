@@ -1,0 +1,11 @@
+/* Geometry moves only within one scene; hierarchy navigation mounts a fresh halo. */
+.drawing .execution-highlight {
+  transition: left 280ms cubic-bezier(.22,.7,.2,1), top 280ms cubic-bezier(.22,.7,.2,1), width 280ms cubic-bezier(.22,.7,.2,1), height 280ms cubic-bezier(.22,.7,.2,1), border-color 200ms ease;
+  will-change: left, top, width, height;
+}
+.canvas-motion-scene { position: absolute; inset: 0; }
+.canvas-motion-snapshot { position: absolute; inset: 0; z-index: 19; overflow: hidden; pointer-events: none; background: var(--canvas-background, #fff); }
+@media (prefers-reduced-motion: reduce) {
+  .drawing .execution-highlight { transition: none; will-change: auto; }
+  .canvas-motion-snapshot { display: none; }
+}

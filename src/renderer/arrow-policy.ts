@@ -1,0 +1,1 @@
+export function unboundArrowIds(elements:readonly any[]):string[]{const blocks=new Set(elements.filter(e=>!e.isDeleted&&['rectangle','ellipse','diamond'].includes(e.type)).map(e=>e.id));return elements.filter(e=>!e.isDeleted&&e.type==='arrow'&&(!blocks.has(e.startBinding?.elementId)||!blocks.has(e.endBinding?.elementId))).map(e=>e.id)}
