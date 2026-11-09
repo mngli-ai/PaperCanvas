@@ -49,3 +49,8 @@ draw.io 对照实测、独立子文件格式、端口与论文来源编辑 UI、
 ## 依赖与借鉴
 
 直接依赖 Excalidraw MIT，公式采用 KaTeX。draw.io 展示覆盖与 Simulink 的进入/逐过程/跳出作为交互参考。当前未复制社区 MCP 项目源码；桥接为本项目实现。没有复制 tldraw、Simulink 商业源码，也没有使用 Obsidian Excalidraw AGPL 源码。正式分发需生成完整第三方声明。
+## Agent 架构绘图 Skill
+
+[`skills/papercanvas-architecture`](skills/papercanvas-architecture) 提供多层架构生成器、严格检查脚本与两份可编辑工程示例。只需 Node.js，无额外安装。支持 child 层级、完整双向图元绑定、数据流反馈边和显式演示路线。
+
+下载 [`papercanvas-architecture-v0.1.0.zip`](packages/papercanvas-architecture-v0.1.0.zip)，解压后将整个文件夹放进 Hermes skills 目录。调用 `/papercanvas-architecture`。两轮子智能体试用的失败与修订记录见 skill 内 `references/validation.md`。自动布局当前为纵向教学管线，不声称支持完整论文级并行自动布局。

@@ -1,0 +1,84 @@
+{
+  "title": "检索增强科研助手：多源证据检索与可追溯回答架构（设计示意）",
+  "root": "overview",
+  "canvases": [
+    {
+      "id": "overview",
+      "title": "第一层｜科研问题与授权资料共同驱动的检索增强助手总览",
+      "nodes": [
+        {"id":"question","label":"研究者提交包含研究范围、时间边界与证据偏好的复杂科研问题","detail":"设计示意：不代表已部署产品，也不声称真实检索效果或论文结论。"},
+        {"id":"ingestion","label":"授权文献与实验记录的离线解析、切块和版本化索引建设","child":"ingestion"},
+        {"id":"retrieval","label":"问题约束驱动的在线混合检索、候选融合与证据质量筛选","child":"retrieval"},
+        {"id":"generation","label":"基于可追溯证据包的回答组织、逐项核验与不确定性说明","child":"generation"},
+        {"id":"delivery","label":"交付带原文定位、研究分歧说明及证据不足提示的研究简报"}
+      ],
+      "edges":[["question","retrieval"],["question","generation"],["ingestion","retrieval"],["retrieval","generation"],["generation","delivery"]],
+      "route":["question","ingestion","retrieval","generation","delivery"]
+    },
+    {
+      "id":"ingestion",
+      "title":"第二层｜资料入库：保留权限、版本和原文定位的可更新知识底座",
+      "nodes":[
+        {"id":"sources","label":"接收具有访问授权的论文全文、补充材料与内部实验记录"},
+        {"id":"parse","label":"解析章节层级、表格上下文与页码锚点并保留原始文档标识"},
+        {"id":"chunks","label":"按语义段落生成带版本号、权限标签和原文偏移的证据切块"},
+        {"id":"dense","label":"为证据切块建立语义向量索引并记录嵌入模型版本"},
+        {"id":"sparse","label":"为术语、作者与实验实体建立关键词倒排索引及元数据目录"}
+      ],
+      "edges":[["sources","parse"],["parse","chunks"],["chunks","dense"],["chunks","sparse"]],
+      "route":["sources","parse","chunks","dense","sparse"]
+    },
+    {
+      "id":"retrieval",
+      "title":"第二层｜在线检索：在同一权限与时间边界内并行寻找不同类型的证据",
+      "nodes":[
+        {"id":"constraints","label":"解析研究意图并生成权限、发表时间与研究对象过滤条件"},
+        {"id":"semantic","label":"在过滤后的向量索引中执行语义相似证据召回"},
+        {"id":"keyword","label":"在过滤后的倒排索引中执行专有术语与精确实体召回"},
+        {"id":"fusion","label":"合并两路候选并进行去重、重排及互相矛盾证据的联合保留","child":"fusion"},
+        {"id":"packet","label":"输出带来源、相关性说明和证据缺口标记的上下文证据包"}
+      ],
+      "edges":[["constraints","semantic"],["constraints","keyword"],["semantic","fusion"],["keyword","fusion"],["fusion","packet"]],
+      "route":["constraints","semantic","keyword","fusion","packet"]
+    },
+    {
+      "id":"fusion",
+      "title":"第三层｜证据融合：相关性排序不替代来源质量判断与逐条引用核验",
+      "nodes":[
+        {"id":"union","label":"归一化向量召回与关键词召回的候选列表并记录各自召回来源"},
+        {"id":"rerank","label":"针对研究问题进行候选证据重排并识别直接支持与间接相关"},
+        {"id":"diversity","label":"按文档版本去重并保留不同方法、相反结果和研究条件差异"},
+        {"id":"attribution","label":"把候选主张映射回原文段落并核验版本、定位与访问权限","child":"attribution"},
+        {"id":"budget","label":"按上下文预算组装兼顾相关性、证据多样性与可追溯性的材料"}
+      ],
+      "edges":[["union","rerank"],["union","diversity"],["rerank","attribution"],["diversity","attribution"],["attribution","budget"]],
+      "route":["union","rerank","diversity","attribution","budget"]
+    },
+    {
+      "id":"attribution",
+      "title":"第四层｜引用溯源机制：以冻结版本的原文为依据验证每一条证据定位",
+      "nodes":[
+        {"id":"freeze","label":"冻结候选证据的文档版本、段落偏移与主张标识以避免引用漂移"},
+        {"id":"anchor","label":"核对证据原文是否可读取以及页码、章节和段落锚点是否匹配"},
+        {"id":"permission","label":"重新核对当前用户的文档访问授权与引用片段的使用边界"},
+        {"id":"verify","label":"合并定位核验与权限核验结果并标记缺失、失效和不支持的证据"},
+        {"id":"manifest","label":"交付保留核验状态和可点击原文定位的结构化引用清单","detail":"未通过定位或权限检查的内容不进入回答证据；保留排除原因用于诊断。"}
+      ],
+      "edges":[["freeze","anchor"],["freeze","permission"],["anchor","verify"],["permission","verify"],["verify","manifest"]],
+      "route":["freeze","anchor","permission","verify","manifest"]
+    },
+    {
+      "id":"generation",
+      "title":"第二层｜回答生成：明确区分证据陈述、分析推断与尚未解决的研究问题",
+      "nodes":[
+        {"id":"plan","label":"根据科研问题与已核验的证据包规划回答结构和可支持的主张"},
+        {"id":"draft","label":"只围绕可访问证据撰写结论草稿并为每个关键陈述附上引用"},
+        {"id":"audit","label":"逐项检查草稿是否被引用内容支持并发现过度外推与引用错配"},
+        {"id":"uncertainty","label":"识别相互矛盾的研究结果、检索范围限制以及仍然缺失的证据"},
+        {"id":"release","label":"汇总支持性核验与不确定性分析后发布简报或明确拒绝无依据结论","detail":"本轮采用单次无环流程；失败项只标记或省略，不用回边实现自动重试。"}
+      ],
+      "edges":[["plan","draft"],["draft","audit"],["draft","uncertainty"],["audit","release"],["uncertainty","release"]],
+      "route":["plan","draft","audit","uncertainty","release"]
+    }
+  ]
+}

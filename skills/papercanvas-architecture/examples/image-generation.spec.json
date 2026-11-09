@@ -1,0 +1,70 @@
+{
+  "title": "中文图像生成系统：从创作需求到可追溯交付（独立架构示意）",
+  "root": "creation_overview",
+  "canvases": [
+    {
+      "id": "creation_overview",
+      "title": "第一级｜中文图像生成服务总览（架构示意，非实测系统）",
+      "nodes": [
+        {"id": "user_request", "label": "用户创作需求\n中文描述与参考图", "detail": "用户提供用途、主体描述和可选参考图；不代表任何现有产品的真实接口。"},
+        {"id": "request_coordination", "label": "请求理解与\n任务编排", "child": "request_pipeline", "detail": "整理约束、检查输入并形成可执行任务。"},
+        {"id": "image_synthesis", "label": "条件驱动的\n图像生成", "child": "generation_pipeline", "detail": "以扩散式生成作为示意假设，不承诺特定模型效果或速度。"},
+        {"id": "review_delivery", "label": "人工复核与\n结果交付", "detail": "人工检查图像与需求是否一致；返回图像、种子及生成参数。"},
+        {"id": "revision_feedback", "label": "修改意见\n与新版本需求", "detail": "复核不通过时创建新请求；不把反馈边解释为层级回指。"}
+      ],
+      "edges": [["user_request", "request_coordination"], ["request_coordination", "image_synthesis"], ["image_synthesis", "review_delivery"], ["review_delivery", "revision_feedback"], ["revision_feedback", "request_coordination"]],
+      "route": ["user_request", "request_coordination", "image_synthesis", "review_delivery", "revision_feedback"]
+    },
+    {
+      "id": "request_pipeline",
+      "title": "第二级｜请求理解与任务编排：中文语义、输入检查与条件汇合",
+      "nodes": [
+        {"id": "normalize_request", "label": "规范化输入\n保留原始描述"},
+        {"id": "prompt_compilation", "label": "中文提示词与\n约束编译", "child": "prompt_mechanism", "detail": "展开查看主体、风格、版式与冲突处理。"},
+        {"id": "reference_inspection", "label": "参考图检查\n授权与格式", "detail": "无参考图时跳过图像条件；授权判断需要人工或独立业务规则。"},
+        {"id": "merge_conditions", "label": "汇合文本与\n可选图像条件"},
+        {"id": "enqueue_task", "label": "记录任务参数\n进入生成队列", "detail": "记录尺寸、种子和模型配置；此处未实现真实队列。"}
+      ],
+      "edges": [["normalize_request", "prompt_compilation"], ["normalize_request", "reference_inspection"], ["prompt_compilation", "merge_conditions"], ["reference_inspection", "merge_conditions"], ["merge_conditions", "enqueue_task"]],
+      "route": ["normalize_request", "prompt_compilation", "reference_inspection", "merge_conditions", "enqueue_task"]
+    },
+    {
+      "id": "generation_pipeline",
+      "title": "第二级｜条件驱动图像生成：独立条件分支与采样结果解码",
+      "nodes": [
+        {"id": "load_generation_task", "label": "读取任务\n与模型配置"},
+        {"id": "encode_text_condition", "label": "编码中文\n文本条件"},
+        {"id": "encode_image_condition", "label": "编码可选\n参考图条件"},
+        {"id": "iterative_sampling", "label": "多条件引导\n迭代采样", "child": "sampling_mechanism"},
+        {"id": "decode_and_package", "label": "图像解码\n与参数打包", "detail": "输出供人工复核的候选图；不编造质量指标。"}
+      ],
+      "edges": [["load_generation_task", "encode_text_condition"], ["load_generation_task", "encode_image_condition"], ["encode_text_condition", "iterative_sampling"], ["encode_image_condition", "iterative_sampling"], ["iterative_sampling", "decode_and_package"]],
+      "route": ["load_generation_task", "encode_text_condition", "encode_image_condition", "iterative_sampling", "decode_and_package"]
+    },
+    {
+      "id": "prompt_mechanism",
+      "title": "第三级｜中文提示词编译内部机制：保留用户意图并显式处理相互冲突的风格与版式约束",
+      "nodes": [
+        {"id": "extract_subjects", "label": "提取主体\n动作与关系"},
+        {"id": "extract_composition", "label": "提取风格\n版式与用途"},
+        {"id": "resolve_conflicts", "label": "冲突约束\n标记待确认", "detail": "无法自动消解的冲突交给用户确认，不默认替用户决定。"},
+        {"id": "compile_condition", "label": "生成条件描述\n保存映射记录", "detail": "保留原始中文到条件描述的对应关系，不假设必须翻译成英文。"}
+      ],
+      "edges": [["extract_subjects", "resolve_conflicts"], ["extract_composition", "resolve_conflicts"], ["resolve_conflicts", "compile_condition"]],
+      "route": ["extract_subjects", "extract_composition", "resolve_conflicts", "compile_condition"]
+    },
+    {
+      "id": "sampling_mechanism",
+      "title": "第三级｜多条件引导采样内部机制（不指定模型品牌与采样算法）",
+      "nodes": [
+        {"id": "initialize_latent", "label": "按种子初始化\n潜空间噪声"},
+        {"id": "fuse_conditions", "label": "汇合文本条件\n与参考图条件"},
+        {"id": "predict_denoising", "label": "预测去噪方向\n应用条件引导"},
+        {"id": "advance_schedule", "label": "推进采样步\n检查终止条件", "detail": "未完成时返回去噪预测；数据流含循环，child 层级仍无环。"},
+        {"id": "emit_latent", "label": "输出最终潜变量\n交给图像解码"}
+      ],
+      "edges": [["initialize_latent", "predict_denoising"], ["fuse_conditions", "predict_denoising"], ["predict_denoising", "advance_schedule"], ["advance_schedule", "predict_denoising"], ["advance_schedule", "emit_latent"]],
+      "route": ["initialize_latent", "fuse_conditions", "predict_denoising", "advance_schedule", "emit_latent"]
+    }
+  ]
+}
