@@ -5,6 +5,8 @@ const api: PaperApi = {
   workspaceGet: () => ipcRenderer.invoke('paper:workspace:get'),
   workspaceChoose: () => ipcRenderer.invoke('paper:workspace:choose'),
   workspaceList: (relativePath = '') => ipcRenderer.invoke('paper:workspace:list', relativePath),
+  workspaceCreateFolder: (parentRelativePath, name) => ipcRenderer.invoke('paper:workspace:create-folder', parentRelativePath, name),
+  workspaceOpen: (relativePath) => ipcRenderer.invoke('paper:workspace:open', relativePath),
   workspaceRead: (relativePath) => ipcRenderer.invoke('paper:workspace:read', relativePath),
   workspaceReadDroppedFile: async (file) => {
     const path = webUtils.getPathForFile(file)

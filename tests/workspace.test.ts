@@ -4,6 +4,8 @@ import { mkdtemp, mkdir, writeFile, rm, symlink, open } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { WorkspaceStore, WORKSPACE_ENTRY_LIMIT, WORKSPACE_FILE_LIMIT } from '../src/main/workspace.ts'
+import { createProject } from '../src/domain/project.ts'
+import { documentTargetFor } from '../src/main/document-target.ts'
 
 async function fixture(t: any) {
   const base = await mkdtemp(join(tmpdir(), 'paper-workspace-'))
@@ -84,4 +86,54 @@ test('workspace missing/corrupt preferences do not grant a root', async (t) => {
   await assert.rejects(store.read('x.json'), /工作区不存在/)
   await writeFile(preference, JSON.stringify({ rootPath: join(base, 'missing') }))
   assert.equal(await new WorkspaceStore(preference).get(), null)
+})
+
+test('workspace creates one exclusive directory under an existing parent', async (t) => {
+  const { root, store } = await fixture(t)
+  assert.deepEqual(await store.createFolder('', '新目录'), { name: '新目录', relativePath: '新目录', type: 'directory' })
+  assert.equal((await store.createFolder('新目录', '子目录')).relativePath, '新目录/子目录')
+  await assert.rejects(store.createFolder('', '新目录'), /EEXIST/)
+  await writeFile(join(root, 'occupied'), 'keep')
+  await assert.rejects(store.createFolder('', 'occupied'), /EEXIST/)
+  await assert.rejects(store.createFolder('missing', 'child'))
+  for (const name of ['', '.', '..', '../escape', 'a/b', 'a\\b', 'C:ads', 'CON', 'con.json', 'LPT1', 'COM9.txt', 'NUL', 'AUX', 'PRN', 'COM¹', 'bad.', 'bad ', 'bad?', 'bad\0', 'bad\n', null, 5]) {
+    await assert.rejects(store.createFolder('', name), String(name))
+  }
+  await assert.rejects(store.createFolder('../', 'escape'))
+})
+
+test('workspace open validates projects and distinguishes unbound Excalidraw imports', async (t) => {
+  const { root, store } = await fixture(t)
+  const project = createProject()
+  await writeFile(join(root, 'project.json'), JSON.stringify(project))
+  const result = await store.open('project.json')
+  assert.equal(result.type, 'project')
+  assert.deepEqual(result.project, project)
+  assert.equal(result.path, join((await store.get())!.rootPath, 'project.json'))
+  const target = result.type === 'project' ? { projectId: result.project.id, path: result.path } : null
+  assert.equal(documentTargetFor(target, project.id).path, result.path)
+  assert.equal(documentTargetFor(target, 'different').path, null)
+  await writeFile(join(root, 'bad.json'), '{}')
+  await assert.rejects(store.open('bad.json'))
+  await writeFile(join(root, 'broken.json'), '{bad')
+  await assert.rejects(store.open('broken.json'))
+  await writeFile(join(root, 'scene.excalidraw'), '{"type":"excalidraw"}')
+  const imported = await store.open('scene.excalidraw')
+  assert.equal(imported.type, 'excalidraw')
+  assert.equal(imported.path, null)
+  assert.equal(imported.project, null)
+  assert.equal(imported.text, '{"type":"excalidraw"}')
+  await writeFile(join(root, 'library.excalidrawlib'), '{}')
+  await assert.rejects(store.open('library.excalidrawlib'), /素材库/)
+})
+
+test('workspace rejects even in-root junction aliases for read, open and creation', async (t) => {
+  const { root, store } = await fixture(t)
+  await mkdir(join(root, 'real'))
+  await writeFile(join(root, 'real', 'project.json'), JSON.stringify(createProject()))
+  await symlink(join(root, 'real'), join(root, 'alias'), process.platform === 'win32' ? 'junction' : 'dir')
+  await assert.rejects(store.createFolder('alias', 'child'), /符号链接/)
+  await assert.rejects(store.read('alias/project.json'), /符号链接/)
+  await assert.rejects(store.open('alias/project.json'), /符号链接/)
+  await assert.rejects(store.list('alias'), /符号链接/)
 })

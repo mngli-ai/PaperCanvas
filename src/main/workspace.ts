@@ -1,6 +1,7 @@
-import { mkdir, open, opendir, readFile, realpath, rename, stat, unlink, writeFile } from 'node:fs/promises'
+import { mkdir, lstat, open, opendir, readFile, realpath, rename, stat, unlink, writeFile } from 'node:fs/promises'
 import { basename, dirname, isAbsolute, relative, resolve, sep, win32 } from 'node:path'
-import type { WorkspaceFile, WorkspaceFileKind, WorkspaceInfo, WorkspaceListing } from '../shared/types.ts'
+import type { WorkspaceEntry, WorkspaceFile, WorkspaceFileKind, WorkspaceInfo, WorkspaceListing, WorkspaceOpenResult } from '../shared/types.ts'
+import { parseProject } from '../domain/project.ts'
 
 export const WORKSPACE_FILE_LIMIT = 32 * 1024 * 1024
 export const WORKSPACE_ENTRY_LIMIT = 1000
@@ -14,10 +15,18 @@ export function workspaceFileKind(name: string): WorkspaceFileKind | null {
   return null
 }
 
+function validateName(value: unknown): string {
+  if (typeof value !== 'string' || !value || value.length > 255 || value === '.' || value === '..'
+    || /[<>:"/\\\\|?*\x00-\x1f]/.test(value) || /[. ]$/.test(value)
+    || /^(?:CON|PRN|AUX|NUL|CONIN\$|CONOUT\$|COM[1-9¹²³]|LPT[1-9¹²³])(?:\.|$)/i.test(value)) throw new Error('无效目录或文件名')
+  return value
+}
+
 function validateRelative(value: unknown, allowRoot = false): string {
   if (typeof value !== 'string' || value.length > 4096 || /[\\\0:]/.test(value) || isAbsolute(value) || win32.isAbsolute(value)) throw new Error('无效工作区相对路径')
   if (allowRoot && value === '') return value
   if (!value || value.split('/').some((part) => !part || part === '.' || part === '..')) throw new Error('无效工作区相对路径')
+  value.split('/').forEach(validateName)
   return value
 }
 
@@ -78,7 +87,31 @@ export class WorkspaceStore {
     const root = info.rootPath
     const path = await realpath(resolve(root, relativePath))
     if (!confined(root, path)) throw new Error('文件超出已授权工作区')
+    let component = root
+    for (const part of relativePath ? relativePath.split('/') : []) {
+      component = resolve(component, part)
+      if ((await lstat(component)).isSymbolicLink()) throw new Error('不允许通过符号链接或 junction 访问工作区')
+    }
     return { root, path, relativePath }
+  }
+
+  async createFolder(parentValue: unknown, nameValue: unknown): Promise<WorkspaceEntry> {
+    const name = validateName(nameValue)
+    const parent = await this.target(parentValue, true)
+    if (!(await stat(parent.path)).isDirectory()) throw new Error('父路径必须是目录')
+    const relativePath = [parent.relativePath, name].filter(Boolean).join('/')
+    validateRelative(relativePath)
+    // recursive:false is exclusive: existing files, directories and links all fail.
+    await mkdir(resolve(parent.path, name), { recursive: false })
+    return { name, relativePath, type: 'directory' }
+  }
+
+  async open(value: unknown): Promise<WorkspaceOpenResult> {
+    const file = await this.read(value)
+    if (file.kind === 'excalidrawlib') throw new Error('素材库不能作为工程打开，请使用素材导入')
+    if (file.kind === 'excalidraw') return { ...file, type: 'excalidraw', project: null, path: null }
+    const project = parseProject(file.text)
+    return { ...file, type: 'project', project, path: resolve(file.workspace.rootPath, file.relativePath) }
   }
 
   async list(value: unknown = ''): Promise<WorkspaceListing> {

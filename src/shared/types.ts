@@ -8,7 +8,13 @@ export interface WorkspaceInfo { rootPath: string; name: string }
 export interface WorkspaceEntry { name: string; relativePath: string; type: 'directory' | 'file'; kind?: WorkspaceFileKind }
 export interface WorkspaceListing { workspace: WorkspaceInfo; relativePath: string; entries: WorkspaceEntry[]; truncated: boolean }
 export interface WorkspaceFile { workspace: WorkspaceInfo; name: string; relativePath: string; kind: WorkspaceFileKind; text: string }
+export type WorkspaceOpenResult = WorkspaceFile & (
+  | { type: 'project'; project: Project; path: string }
+  | { type: 'excalidraw'; project: null; path: null }
+)
 export interface PaperApi {
+  workspaceCreateFolder(parentRelativePath: string, name: string): Promise<WorkspaceEntry>
+  workspaceOpen(relativePath: string): Promise<WorkspaceOpenResult>
   workspaceGet(): Promise<WorkspaceInfo | null>
   workspaceChoose(): Promise<WorkspaceInfo | null>
   workspaceList(relativePath?: string): Promise<WorkspaceListing>

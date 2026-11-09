@@ -1,1 +1,40 @@
-.app .file-row{display:flex;align-items:center;gap:3px}.app .file-row>.file-entry{flex:1;min-width:0}.app .file-row>button:last-child{width:25px!important;min-width:25px;padding:4px!important}.app .file-entry{width:100%;text-align:left!important;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-size:12px!important;margin:2px 0!important;padding-top:6px!important;padding-bottom:6px!important}.app .folder{font-weight:600}.app .empty-hint{font-size:12px;line-height:1.8;color:#7b879b}.app .pane-heading h3{flex:1;white-space:nowrap}.app .pane-heading{flex-wrap:wrap}
+.app .workspace-browser .pane-heading { display:flex; align-items:center; flex-wrap:wrap; gap:6px; }
+.app .workspace-browser .pane-heading h3 { flex:1; white-space:nowrap; }
+.app .workspace-browser .browser-actions { display:flex; align-items:center; justify-content:space-between; gap:6px; margin-bottom:6px; }
+.app .workspace-browser .browser-actions button { width:auto!important; margin:0!important; padding:5px 8px!important; }
+.app .workspace-browser .workspace-root { display:block; width:100%; margin:8px 0 4px!important; padding:5px 8px!important; border-color:transparent; background:transparent; font-size:12px; font-weight:600; color:#66758a; text-align:left; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.app .workspace-browser .workspace-tree { min-width:0; }
+.app .workspace-browser .file-row { display:flex; align-items:center; gap:2px; border-radius:5px; min-width:0; }
+.app .workspace-browser .file-row:hover { background:#f0f3f8; }
+.app .workspace-browser .file-row.is-selected { background:#e6edfa; }
+.app .workspace-browser .file-row > .file-entry {
+  --tree-depth:0;
+  display:flex!important; align-items:center; gap:5px; flex:1; min-width:0; width:100%;
+  /* The shell gives every sidebar button shorthand padding. Override it explicitly. */
+  padding:6px 6px 6px calc(6px + var(--tree-depth, 0) * 18px)!important;
+  margin:1px 0!important; min-height:30px; text-align:left!important;
+  border:1px solid transparent; border-radius:5px; background:transparent; box-shadow:none;
+  font-size:12px!important; font-weight:400; color:#46536a; overflow:hidden; white-space:nowrap;
+}
+.app .workspace-browser .file-row > .folder { font-weight:600; }
+.app .workspace-browser .file-row > .file-entry:hover:not(:disabled),
+.app .workspace-browser .file-row > .file-entry:active:not(:disabled) { background:transparent; border-color:transparent; box-shadow:none; }
+.app .workspace-browser .file-row > .file-entry[aria-selected="true"] { color:#284f92; }
+.app .workspace-browser .file-row > .file-entry:focus-visible { outline:2px solid #7294d0; outline-offset:-2px; }
+.app .workspace-browser .tree-chevron { display:inline-flex; flex:none; align-items:center; justify-content:center; width:12px; height:16px; font-size:20px; line-height:1; color:#8290a3; transition:transform .12s ease; }
+.app .workspace-browser .tree-chevron.is-expanded { transform:rotate(90deg); }
+.app .workspace-browser .tree-icon { flex:none; width:16px; height:16px; color:#8895a8; }
+.app .workspace-browser .folder .tree-icon { color:#748caf; }
+.app .workspace-browser .tree-name { min-width:0; overflow:hidden; text-overflow:ellipsis; }
+.app .workspace-browser .file-row > .file-import { flex:none; display:block; width:25px!important; min-width:25px; min-height:25px; margin:0 3px 0 0!important; padding:3px!important; text-align:center!important; border-color:transparent; background:transparent; color:#6f809a; }
+.app .workspace-browser .tree-empty { margin:2px 0 5px; padding-left:calc(39px + var(--tree-depth, 0) * 18px); font-size:11px; color:#8895a8; }
+.app .workspace-browser .empty-hint { font-size:12px; line-height:1.8; color:#7b879b; }
+.app .workspace-browser .browser-status { min-height:0; font-size:11px; line-height:1.6; color:#7b879b; overflow-wrap:anywhere; }
+.app .workspace-browser .browser-status:empty { display:none; }
+.app .workspace-browser .browser-error { margin:6px 0; padding:7px 8px; border:1px solid #efc9ca; border-radius:5px; background:#fff2f2; color:#a53840; font-size:12px; line-height:1.6; overflow-wrap:anywhere; }
+.app .workspace-browser .folder-create { display:grid; gap:6px; margin:8px 0; padding:8px; border:1px solid #d6e0ef; border-radius:6px; background:#f6f8fc; }
+.app .workspace-browser .folder-create label { font-size:11px; line-height:1.6; color:#687b96; overflow-wrap:anywhere; }
+.app .workspace-browser .folder-create input { box-sizing:border-box; width:100%; min-width:0; padding:6px 8px; border:1px solid #bccce4; border-radius:4px; background:#fff; color:#304361; font:inherit; font-size:12px; }
+.app .workspace-browser .folder-create-actions { display:flex; gap:6px; }
+.app .workspace-browser .folder-create-actions button { flex:1; width:auto!important; margin:0!important; padding:5px 8px!important; text-align:center!important; }
+@media (prefers-reduced-motion:reduce) { .app .workspace-browser .tree-chevron { transition:none; } }

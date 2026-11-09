@@ -68,6 +68,17 @@ ipcMain.handle('paper:workspace:choose', async (event) => {
   } finally { choosingWorkspace = false }
 })
 ipcMain.handle('paper:workspace:list', async (event, path: unknown = '') => { trusted(event); return workspace().list(path) })
+ipcMain.handle('paper:workspace:create-folder', async (event, parent: unknown, name: unknown) => {
+  trusted(event)
+  return workspace().createFolder(parent, name)
+})
+ipcMain.handle('paper:workspace:open', async (event, path: unknown) => {
+  trusted(event)
+  const result = await workspace().open(path)
+  // Only bind after parsing succeeds. Scene imports must forget any old destination.
+  currentTarget = result.type === 'project' ? { projectId: result.project.id, path: result.path } : null
+  return result
+})
 ipcMain.handle('paper:workspace:read', async (event, path: unknown) => { trusted(event); return workspace().read(path) })
 ipcMain.handle('paper:workspace:read-dropped', async (event, path: unknown) => { trusted(event); return workspace().readDroppedPath(path) })
 
